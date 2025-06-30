@@ -1,0 +1,7 @@
+djangorestframework
+django-autoslug
+django-debug-toolbar
+django-filter
+django-phonenumber-field[phonenumberslite]
+drf-nested-routers
+mysqlclient
