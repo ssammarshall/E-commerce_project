@@ -20,7 +20,6 @@ from .serializers import (
 class CartViewSet(ModelViewSet):
     queryset = Cart.objects.prefetch_related('items__product').all()
     serializer_class = CartSerializer
-    permission_classes = [IsAdminOrReadyOnly]
 
 
 class CartItemViewSet(ModelViewSet):
