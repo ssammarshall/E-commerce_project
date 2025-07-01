@@ -88,6 +88,8 @@ class Customer(models.Model):
 class Order(models.Model):
     """
     Finalized Cart that accepts or has accepted payment.
+
+    Requires Customer/User profile to create.
     """
     PAYMENT_STATUS_PENDING = 'P'
     PAYMENT_STATUS_COMPLETE = 'C'
