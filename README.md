@@ -5,7 +5,11 @@
 ```
 git clone https://github.com/ssammarshall/e-commerce_project.git
 ```
-### 2. Create a virtual environment
+### 2. CD into project directory
+```
+cd e-commerce_project
+```
+### 3. Create a virtual environment
 ```
 python -m venv venv
 
@@ -16,21 +20,20 @@ source venv/bin/activate
 # Command Prompt (CMD): venv\Scripts\activate.bat
 # PowerShell: venv\Scripts\Activate.ps1
 ```
-### 3. Install dependencies
+### 4. Install dependencies
 ```
-pipenv install -r requirements.txt
+pip install -r requirements.txt
 ```
-### 4. Apply migrations
+### 5. Apply migrations
 ```
 python manage.py migrate
 ```
-### 5. (Optional) Create superuser
+### 6. (Optional) Create superuser
 ```
 python manage.py createsuperuser
 ```
-### 6. Run the server
+### 7. Run the server
 ```
 python manage.py runserver
 ```
-Open in browser
-(http://127.0.0.1:8000/)
+Open in browser: http://127.0.0.1:8000/
