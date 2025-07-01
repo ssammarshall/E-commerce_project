@@ -27,7 +27,6 @@ class CartItemViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['product__title']
     ordering_fields = ['product__price', 'quantity']
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return CartItem.objects \
