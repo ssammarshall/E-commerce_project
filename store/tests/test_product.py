@@ -163,9 +163,6 @@ class TestDestoryProduct:
 
 @pytest.mark.django_db
 class TestListProduct:
-    # TODO: UnorderedObjectListWarnings. configure ProductViewSet queryset to .order_by('title'); add 'title' to ordering_fields
-    # TODO: Remove 'price' from ProductViewSet search_fields.
-    # TODO: Add test_if_list_can_order_by_title(self, api_client)
 
     # Filter Backends.
     def test_if_list_can_filter_by_collection(self, api_client):
@@ -183,6 +180,36 @@ class TestListProduct:
         assert response.status_code == status.HTTP_200_OK
         assert data['results']
         assert len(data['results']) == collection1_num_of_products
+
+    def test_if_list_can_filter_by_price(self, api_client):
+        from decimal import Decimal
+        # Greater than.
+        high_price = 30.00
+        num_of_expensive_products = 5
+        baker.make(Product, slug=slug, price=high_price + 0.01, _quantity=num_of_expensive_products) # Products with a price $0.01 more than low_price.
+        baker.make(Product, slug=slug, price=high_price - 0.01, _quantity=100) # Products with a price $0.01 less than low_price.
+        url = get_products_list_url() + f'?price__gt={high_price}'
+
+        response = api_client.get(url)
+        data = response.data
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(data['results']) == num_of_expensive_products
+        for product in data['results']: assert Decimal(product['price']) > high_price
+
+        # Less than.
+        low_price = 3.00
+        num_of_cheap_products = 4
+        baker.make(Product, slug=slug, price=low_price - 0.01, _quantity=num_of_cheap_products) # Products with a price $0.01 less than low_price.
+        baker.make(Product, slug=slug, price=low_price + 0.01, _quantity=100) # Products with a price $0.01 more than low_price.
+        url = get_products_list_url() + f'?price__lt={low_price}'
+
+        response = api_client.get(url)
+        data = response.data
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(data['results']) == num_of_cheap_products
+        for product in data['results']: assert Decimal(product['price']) < low_price
 
     def test_if_list_can_order_by_last_update(self, api_client):
         # JSON data from response does not contain the last_update field.
@@ -233,6 +260,30 @@ class TestListProduct:
 
         assert response.status_code == status.HTTP_200_OK
         assert prices_descending == sorted(prices_descending, reverse=True)
+
+    def test_if_list_can_order_by_title(self, api_client):
+        # Ascending order.
+        baker.make(Product, slug=slug, _quantity=5)
+        url = get_products_list_url() + '?ordering=title'
+
+        response = api_client.get(url)
+        data = response.data
+        results = data['results']
+        titles_ascending = [product['title'] for product in results]
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert titles_ascending == sorted(titles_ascending, key=str.lower)
+        
+        # Descending order.
+        url = get_products_list_url() + '?ordering=-title'
+
+        response = api_client.get(url)
+        data = response.data
+        results = data['results']
+        titles_descending = [product['title'] for product in results]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert titles_descending == sorted(titles_descending, key=str.lower, reverse=True)
 
     def test_if_list_can_search_by_title(self, api_client):
         search_text = 'Big'

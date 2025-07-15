@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthentic
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from .filters import ProductFilter
 from .models import Cart, CartItem, Collection, Customer, Order, OrderItem, Product, Review
 from .pagination import DefaultPagination
 from .permissions import IsAdminOrReadyOnly
@@ -112,15 +113,15 @@ class OrderItemViewSet(ModelViewSet):
 
 
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.annotate(review_count=Count('reviews')).all()
+    queryset = Product.objects.annotate(review_count=Count('reviews')).order_by('title').all()
     serializer_class = ProductSerializer
 
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
-    filterset_fields = ['collection_id'] # TODO: create ProductFilter class  
-    ordering_fields = ['price', 'last_update']
+    filterset_class = ProductFilter
+    ordering_fields = ['title', 'price', 'last_update']
     pagination_class = DefaultPagination
     permission_classes = [IsAdminOrReadyOnly]
-    search_fields = ['title', 'price']
+    search_fields = ['title']
     
 
 class ReviewViewSet(ModelViewSet):
