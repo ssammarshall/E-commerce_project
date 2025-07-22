@@ -26,7 +26,6 @@ def get_reviews_list_url(product_id):
 def create_review_payload(product_id, **overrides):
     payload = {
         'product': product_id,
-        'name': 'N',
         'description': 'D'
     }
     payload.update(overrides)
@@ -40,34 +39,20 @@ def product_and_review():
     product = baker.make(Product, slug=slug)
     return (product, baker.make(Review, product=product))
 
-
-# TODO: Auto-populate 'name' field from auth user first and last names; change to only edit 'description' not 'name'
-
 # Tests.
 
 @pytest.mark.django_db
 class TestCreateReview:
 
     # Validation.
-    MISSING_FIELD_PAYLOADS = [
-        ('name', {'description': 'D'}),
-        ('description', {'name': 'N'})
-    ]
-    @pytest.mark.parametrize('missing_field, payload', MISSING_FIELD_PAYLOADS)
-    def test_if_missing_required_field_returns_400(
-        self,
-        api_client,
-        authenticate,
-        missing_field,
-        payload
-    ):
+    def test_if_missing_description_returns_400(self, api_client, authenticate):
         authenticate(True)
         product = baker.make(Product, slug=slug)
         url = get_reviews_list_url(product_id=product.id)
 
-        response = api_client.post(url, payload)
+        response = api_client.post(url, {})
         data = response.data
-        error = data[missing_field][0]
+        error = data['description'][0]
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert error == 'This field is required.'
@@ -143,7 +128,48 @@ class TestDeleteReview:
 
 @pytest.mark.django_db
 class TestListReview:
-    # TODO: add pagination, ordering
+    
+    # Filter Backends.
+    def test_if_list_can_order_by_date(self, api_client):
+        product = baker.make(Product, slug=slug)
+        baker.make(Review, product=product)
+
+        # Ascending order.
+        url = get_reviews_list_url(product.id) + '?ordering=date'
+
+        response = api_client.get(url)
+        data = response.data
+        dates_ascending = [review['date'] for review in data.get('results', data)]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert dates_ascending == sorted(dates_ascending)
+
+        # Descending order.
+        url = get_reviews_list_url(product.id) + '?ordering=-date'
+
+        response = api_client.get(url)
+        data = response.data
+        dates_descending = [review['date'] for review in data.get('results', data)]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert dates_descending == sorted(dates_descending, reverse=True)
+
+    def test_if_list_has_pagination_present(self, api_client):
+        from store.pagination import DefaultPagination
+        max_num_of_pages = DefaultPagination.page_size
+        product = baker.make(Product, slug=slug)
+        baker.make(Review, product=product, _quantity=max_num_of_pages+1)
+        url = get_reviews_list_url(product.id)
+
+        response = api_client.get(url)
+        data = response.data
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert data['next'] != None
+        assert data['previous'] == None
+        assert data['results']
+        assert len(data['results']) == max_num_of_pages
+
 
     # Permissions.
     IS_STAFF = [None, False, True]
@@ -163,7 +189,7 @@ class TestListReview:
         data = response.data
         
         assert response.status_code == status.HTTP_200_OK
-        assert data[0]['id'] == review.id
+        assert data['results'][0]['id'] == review.id
 
 
 @pytest.mark.django_db

@@ -223,9 +223,14 @@ class OrderPostSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(read_only=True)
+
     def create(self, validated_data):
         product_id = self.context['product_id']
-        return Review.objects.create(product_id=product_id, **validated_data)
+        request = self.context['request']
+        user = request.user
+        username=user.username
+        return Review.objects.create(product_id=product_id, name=username, **validated_data)
 
     class Meta:
         model = Review

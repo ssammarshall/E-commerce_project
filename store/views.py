@@ -126,10 +126,14 @@ class ProductViewSet(ModelViewSet):
 
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer
+
+    filter_backends = [OrderingFilter]
+    ordering_fields = ['date']
+    pagination_class = DefaultPagination
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        return Review.objects.filter(product_id=self.kwargs['product_pk'])
+        return Review.objects.filter(product_id=self.kwargs['product_pk']).order_by('date')
     
     def get_serializer_context(self):
-        return {'product_id': self.kwargs['product_pk']}
+        return {'product_id': self.kwargs['product_pk'], 'request': self.request}
