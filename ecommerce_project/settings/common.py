@@ -4,15 +4,6 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&(sx-tw=wqhgxlolqwkzxgi72f^@&g(e4)xv_%cc9y^0s5x)kr'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -23,7 +14,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'debug_toolbar',
     'django_filters',
     'phonenumber_field',
     'rest_framework',
@@ -43,7 +33,7 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
-ROOT_URLCONF = 'ecommerce_project.urls'
+ROOT_URLCONF = 'ecommerce_project.urls.common'
 
 TEMPLATES = [
     {
@@ -61,20 +51,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ecommerce_project.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ecommerce',
-        'HOST': 'localhost',
-        'USER': 'root',
-        'PASSWORD': 'password'
-    }
-}
 
 
 # Authentication
