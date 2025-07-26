@@ -22,7 +22,7 @@ source venv/bin/activate
 ```
 ### 4. Install dependencies
 ```
-pip install -r requirements.txt
+pip install -r requirements_dev.txt
 ```
 ### 5. Apply migrations
 ```
