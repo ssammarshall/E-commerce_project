@@ -9,7 +9,11 @@ git clone https://github.com/ssammarshall/e-commerce_project.git
 ```
 cd e-commerce_project
 ```
-### 3. Create a virtual environment
+### 3. Set environment variables
+```
+cp .env.example .env
+```
+### 4. Create a virtual environment
 ```
 python -m venv venv
 
@@ -20,7 +24,7 @@ source venv/bin/activate
 # Command Prompt (CMD): venv\Scripts\activate.bat
 # PowerShell: venv\Scripts\Activate.ps1
 ```
-### 4. Run project in development or production
+### 5. Run project in development or production
 ```
 # DEVELOPMENT (includes debug-toolbar and pytest):
 

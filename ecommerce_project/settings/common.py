@@ -1,7 +1,23 @@
 from pathlib import Path
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+# Environment
+
+env = environ.Env()
+
+env_file = BASE_DIR / '.env'
+if env_file.exists():
+    environ.Env.read_env(env_file)
+
+SECRET_KEY = env('SECRET_KEY')
+
+DATABASES = {
+    'default': env.db()
+}
 
 
 # Application definition
