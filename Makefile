@@ -7,7 +7,7 @@ install-prod:
 	$(PIP) install -r requirements.txt
 
 install-dev: install-prod
-	$(PIP) install -r requirements_dev.txt
+	$(PIP) install -r requirements.txt -r requirements_dev.txt
 
 
 # Run migrations.
