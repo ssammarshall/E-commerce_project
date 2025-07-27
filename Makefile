@@ -23,7 +23,7 @@ migrate-dev:
 # Start server.
 
 run-prod:
-	$(PY) manage.py runserver --settings=ecommerce_project.settings.prod
+	$(PY) manage.py runserver --settings=ecommerce_project.settings.common
 
 run-dev:
 	$(PY) manage.py runserver --settings=ecommerce_project.settings.dev
