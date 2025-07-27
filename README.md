@@ -13,27 +13,31 @@ cd e-commerce_project
 ```
 python -m venv venv
 
-# Mac:
+# Using Mac:
 source venv/bin/activate
 
-# Windows:
+# OR using Windows:
 # Command Prompt (CMD): venv\Scripts\activate.bat
 # PowerShell: venv\Scripts\Activate.ps1
 ```
-### 4. Install dependencies
+### 4. Run project in development or production
 ```
-pip install -r requirements_dev.txt
-```
-### 5. Apply migrations
-```
-python manage.py migrate
-```
-### 6. (Optional) Create superuser
-```
-python manage.py createsuperuser
-```
-### 7. Run the server
-```
-python manage.py runserver
+# DEVELOPMENT (includes debug-toolbar and pytest):
+
+# Using Makefile:
+make dev
+# OR using Windows:
+# Command Prompt (CMD): .\dev.bat
+# PowerShell: .\dev.ps1
+
+
+# PRODUCTION:
+
+# Using Makefile:
+make prod
+# OR using Windows:
+# Command Prompt (CMD): .\prod.bat
+# PowerShell: .\prod.ps1
+
 ```
 Open in browser: http://127.0.0.1:8000/
