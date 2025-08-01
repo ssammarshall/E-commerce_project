@@ -121,6 +121,8 @@ class OrderItem(models.Model):
     product = models.ForeignKey('Product', on_delete=models.PROTECT, related_name='orderitems')
     quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
 
+    class Meta:
+        ordering = ['product__price', 'quantity']
 
 class Product(models.Model):
     """

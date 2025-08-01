@@ -14,7 +14,7 @@ from .serializers import (
     CartSerializer, CartItemSerializer, CartItemPostSerializer, CartItemPatchSerializer,
     CollectionSerializer, CustomerSerializer,
     OrderSerializer, OrderPostSerializer, OrderPatchSerializer,
-    OrderItemSerializer,
+    OrderItemSerializer, OrderItemPostSerializer, OrderItemPatchSerializer,
     ProductSerializer, ReviewSerializer
 )
 
@@ -99,17 +99,26 @@ class OrderViewSet(ModelViewSet):
 
 
 class OrderItemViewSet(ModelViewSet):
-    queryset = OrderItem.objects.all()
-    serializer_class = OrderItemSerializer
+    http_method_names = ['get', 'delete', 'post', 'patch', 'head', 'options']
+
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ['product__title']
     ordering_fields = ['product__price', 'quantity']
+    pagination_class = DefaultPagination
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return OrderItem.objects \
             .filter(order_id=self.kwargs['order_pk']) \
             .select_related('product')
+    
+    def get_serializer_class(self):
+        match self.action:
+            case 'create': return OrderItemPostSerializer
+            case 'partial_update': return OrderItemPatchSerializer
+            case _: return OrderItemSerializer
+    
+    def get_serializer_context(self):
+        return {'order_id': self.kwargs['order_pk']}
 
 
 class ProductViewSet(ModelViewSet):

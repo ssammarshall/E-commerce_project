@@ -167,6 +167,53 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'product', 'quantity', 'total_price']
 
 
+class OrderItemPatchSerializer(serializers.ModelSerializer):
+    """
+    OrderItemSerializer for updating quantity of existing OrderItem.
+    """
+    class Meta:
+        model = CartItem
+        fields = ['quantity']
+
+
+class OrderItemPostSerializer(serializers.ModelSerializer):
+    """
+    OrderItemSerializer for creating new OrderItem.
+    """
+    product_id = serializers.IntegerField()
+
+    @transaction.atomic
+    def save(self, **kwargs):
+        """
+        Checks if a OrderItem with the same product_id already exists and
+        updates the OrderItem's quantity.
+
+        Otherwise creates a new OrderItem.
+        """
+        order_id = self.context['order_id']
+        product_id = self.validated_data['product_id']
+        quantity = self.validated_data['quantity']
+
+        try: # If OrderItem already exists in Order.
+            order_id = OrderItem.objects.get(order_id=order_id, product_id=product_id)
+            order_id.quantity += quantity
+            order_id.save()
+            self.instance = order_id
+        except OrderItem.DoesNotExist: # If OrderItem is not already in Order.
+            self.instance = OrderItem.objects.create(order_id=order_id, **self.validated_data)
+
+        return self.instance
+
+    def validate_product_id(self, value):
+        if not Product.objects.filter(pk=value).exists():
+            raise serializers.ValidationError('No product with given product id was found.')
+        return value
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product_id', 'quantity']
+
+
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     total_price = serializers.SerializerMethodField()
