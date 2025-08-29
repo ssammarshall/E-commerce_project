@@ -91,26 +91,44 @@ class Order(models.Model):
 
     Requires Customer/User profile to create.
     """
-    PAYMENT_STATUS_PENDING = 'P'
-    PAYMENT_STATUS_COMPLETE = 'C'
-    PAYMENT_STATUS_FAILED = 'F'
-    PAYMENT_STATUS_CHOICES = [
-        (PAYMENT_STATUS_PENDING, 'Pending'),
-        (PAYMENT_STATUS_COMPLETE, 'Complete'),
-        (PAYMENT_STATUS_FAILED, 'Failed')
+    STATUS_PENDING = 'P'
+    STATUS_SHIPPED = 'S'
+    STATUS_TRANSIT = 'T'
+    STATUS_DELIVERY = 'D'
+    STATUS_COMPLETE = 'C'
+    STATUS_FAILED = 'F'
+    STATUS_CANCELLED = 'X'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_SHIPPED, 'Shipped'),
+        (STATUS_TRANSIT, 'In Transit'),
+        (STATUS_DELIVERY, 'Out for Delivery'),
+        (STATUS_COMPLETE, 'Complete'),
+        (STATUS_FAILED, 'Failed'),
+        (STATUS_CANCELLED, 'Cancelled')
     ]
 
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
-    payment_status = models.CharField(
+    status = models.CharField(
         max_length=1,
-        choices=PAYMENT_STATUS_CHOICES,
-        default=PAYMENT_STATUS_PENDING
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING
     )
     placed_at = models.DateTimeField(auto_now_add=True)
     
+    def cancel(self):
+        if self.status != self.STATUS_PENDING:
+            raise ValidationError({'status': 'Only pending orders can be cancelled.'})
+        self.status = self.STATUS_CANCELLED
+        self.save(update_fields=['status'])
+
     @admin.display(ordering='customer__id')
     def customer_id(self):
         return self.customer.id
+    
+    class Meta:
+        ordering = ['placed_at']
 
 
 class OrderItem(models.Model):
@@ -123,6 +141,7 @@ class OrderItem(models.Model):
 
     class Meta:
         ordering = ['product__price', 'quantity']
+
 
 class Product(models.Model):
     """

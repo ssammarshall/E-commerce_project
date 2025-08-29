@@ -1,6 +1,7 @@
 from django.db.models.aggregates import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -69,6 +70,10 @@ class CustomerViewSet(ModelViewSet):
 class OrderViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'head', 'options']
 
+    filter_backends = [OrderingFilter]
+    ordering_fields = ['placed_at']
+    pagination_class = DefaultPagination
+
     def create(self, request, *args, **kwargs):
         serializer = OrderPostSerializer(
             data=request.data,
@@ -93,10 +98,23 @@ class OrderViewSet(ModelViewSet):
             case _: return OrderSerializer
 
     def get_permissions(self):
-        if self.action == 'destroy' or self.action == 'partial_update':
+        if self.action == 'partial_update':
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
+    @action(detail=True, methods=['get', 'post'], url_path='cancel') # 'get' method temporary for DRF Browsable API; requires front end interface.
+    def cancel(self, request, pk=None):
+        order: Order = self.get_object()
+
+        if order.status != Order.STATUS_PENDING:
+            return Response(
+                'Only pending orders can be cancelled.',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        order.cancel()
+        serializer = self.get_serializer(order)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class OrderItemViewSet(ModelViewSet):
     http_method_names = ['get', 'delete', 'post', 'patch', 'head', 'options']

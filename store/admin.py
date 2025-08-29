@@ -29,8 +29,8 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['customer_id', 'payment_status', 'placed_at']
-    list_filter = ['payment_status', 'placed_at']
+    list_display = ['customer_id', 'status', 'placed_at']
+    list_filter = ['status', 'placed_at']
     list_per_page = 10
     list_select_related = ['customer']
     ordering = ['placed_at']

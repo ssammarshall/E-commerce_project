@@ -223,13 +223,13 @@ class OrderSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Order
-        fields = ['id', 'payment_status', 'placed_at', 'items', 'total_price']
+        fields = ['id', 'status', 'placed_at', 'items', 'total_price']
 
 
 class OrderPatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['payment_status']
+        fields = ['status']
 
 
 class OrderPostSerializer(serializers.ModelSerializer):
@@ -259,8 +259,6 @@ class OrderPostSerializer(serializers.ModelSerializer):
             Cart.objects.filter(pk=cart_id).delete()
         except Customer.DoesNotExist:
             raise serializers.ValidationError('No customer with given user id was found.')
-        except Cart.DoesNotExist:
-            raise serializers.ValidationError('No cart with given cart id was found.')
         
         return order
     
