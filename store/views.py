@@ -10,7 +10,7 @@ from rest_framework.viewsets import ModelViewSet
 from .filters import ProductFilter
 from .models import Cart, CartItem, Collection, Customer, Order, OrderItem, Product, Review
 from .pagination import DefaultPagination
-from .permissions import IsAdminOrReadyOnly
+from .permissions import IsAdminOrNotAuthenticated, IsAdminOrReadyOnly
 from .serializers import (
     CartSerializer, CartItemSerializer, CartItemPostSerializer, CartItemPatchSerializer,
     CollectionSerializer, CustomerSerializer,
@@ -71,7 +71,7 @@ class CustomerViewSet(ModelViewSet):
     
     def get_permissions(self):
         if self.action == 'create':
-            return [IsAdminUser()] # 
+            return [IsAdminOrNotAuthenticated()]
         return [IsAuthenticated()]
 
     def list(self, request, *args, **kwargs):
