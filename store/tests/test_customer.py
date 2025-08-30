@@ -95,7 +95,7 @@ class TestCreateCustomer:
     # Permissions.
     EXPECTED_PERMISSION_CLASS_RESPONSES = [
         (None, status.HTTP_403_FORBIDDEN),
-        (False, status.HTTP_403_FORBIDDEN),
+        (False, status.HTTP_201_CREATED),
         (True, status.HTTP_201_CREATED)
     ]
     @pytest.mark.parametrize('is_staff, expected', EXPECTED_PERMISSION_CLASS_RESPONSES)
@@ -139,7 +139,7 @@ class TestDestoryCustomer:
     # Permissions.
     EXPECTED_PERMISSION_CLASS_RESPONSES = [
         (None, status.HTTP_403_FORBIDDEN),
-        (False, status.HTTP_403_FORBIDDEN),
+        (False, status.HTTP_204_NO_CONTENT),
         (True, status.HTTP_204_NO_CONTENT)
     ]
     @pytest.mark.parametrize('is_staff, expected', EXPECTED_PERMISSION_CLASS_RESPONSES)
@@ -150,8 +150,10 @@ class TestDestoryCustomer:
         is_staff,
         expected
     ):
-        if is_staff is not None: authenticate(is_staff)
-        customer = baker.make(Customer, phone_number=phone_number)
+        if is_staff is not None:
+            user = authenticate(is_staff)
+            customer = baker.make(Customer, user=user, phone_number=phone_number)
+        else: customer = baker.make(Customer, phone_number=phone_number)
         url = get_customers_detail_url(customer.id)
 
         response = api_client.delete(url)
@@ -191,22 +193,22 @@ class TestPartialUpdateCustomer:
 
     # Validation.
     # Currently returns 200; model/serializer needs to be adjusted
-    # def test_if_birth_date_is_in_future_return_400(self, authenticate, partial_update_customer):
-    #     from datetime import date, timedelta
-    #     authenticate(True)
-    #     customer = baker.make(Customer, phone_number=phone_number)
-    #     birth_date = date.today() + timedelta(days=1)
-    #     password = customer.user.password
-    #     payload = {'birth_date': birth_date,'password': password, 'confirm_password': password}
+    def test_if_birth_date_is_in_future_return_400(self, authenticate, partial_update_customer):
+        from datetime import date, timedelta
+        authenticate(True)
+        customer = baker.make(Customer, phone_number=phone_number)
+        birth_date = date.today() + timedelta(days=1)
+        password = customer.user.password
+        payload = {'birth_date': birth_date,'password': password, 'confirm_password': password}
 
-    #     response = partial_update_customer(customer, payload)
+        response = partial_update_customer(customer, payload)
 
-    #     assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     # Permissions.
     EXPECTED_PERMISSION_CLASS_RESPONSES = [
         (None, status.HTTP_403_FORBIDDEN),
-        (False, status.HTTP_403_FORBIDDEN),
+        (False, status.HTTP_200_OK),
         (True, status.HTTP_200_OK)
     ]
     @pytest.mark.parametrize('is_staff, expected', EXPECTED_PERMISSION_CLASS_RESPONSES)
@@ -255,7 +257,7 @@ class TestRetrieveCustomer:
     # Permissions.
     EXPECTED_PERMISSION_CLASS_RESPONSES = [
         (None, status.HTTP_403_FORBIDDEN),
-        (False, status.HTTP_403_FORBIDDEN),
+        (False, status.HTTP_200_OK),
         (True, status.HTTP_200_OK)
     ]
     @pytest.mark.parametrize('is_staff, expected', EXPECTED_PERMISSION_CLASS_RESPONSES)

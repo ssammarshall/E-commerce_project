@@ -62,9 +62,31 @@ class CollectionViewSet(ModelViewSet):
 class CustomerViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-    queryset = Customer.objects.select_related('user').all()
     serializer_class = CustomerSerializer
-    permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        user = self.request.user
+        customers = Customer.objects.select_related('user')
+        return customers if user.is_staff else customers.filter(user=user)
+    
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsAdminUser()] # 
+        return [IsAuthenticated()]
+
+    def list(self, request, *args, **kwargs):
+        '''
+        Only admin users can view list of customers.
+        '''
+        user = self.request.user
+
+        if user.is_staff:
+            return super().list(request, *args, **kwargs)
+        
+        return Response(
+            'Customer list only available to admin users',
+            status=status.HTTP_403_FORBIDDEN
+        )
 
 
 class OrderViewSet(ModelViewSet):
@@ -115,6 +137,7 @@ class OrderViewSet(ModelViewSet):
         order.cancel()
         serializer = self.get_serializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class OrderItemViewSet(ModelViewSet):
     http_method_names = ['get', 'delete', 'post', 'patch', 'head', 'options']
